@@ -1,0 +1,218 @@
+﻿<Window x:Class="FreeSpace.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:FreeSpace"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:p="clr-namespace:FreeSpace.Properties"
+    mc:Ignorable="d"
+    Title="FreeSpace"
+    Width="600"
+    Height="350"
+    Background="GhostWhite"
+    Closing="Window_Closing"
+    FontSize="15"
+    ResizeMode="CanMinimize"
+    SizeToContent="WidthAndHeight">
+
+    <Grid>
+        <!--#region Row & Column definitions-->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="20" />
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="280" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="20" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20" />
+            <RowDefinition Height="35" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+        <!--#endregion-->
+
+        <!--#region Menu-->
+        <DockPanel
+            Grid.Row="0"
+            Grid.Column="0"
+            Grid.ColumnSpan="6"
+            LastChildFill="False">
+            <Menu DockPanel.Dock="Top" FontSize="14">
+                <MenuItem Header="File">
+                    <MenuItem Name="mnuTaskSched"
+                        Click="MnuTaskSched_Click"
+                        Header="Open Task Scheduler" />
+                    <Separator />
+                    <MenuItem Name="mnuExit"
+                        Click="MnuExit_Click"
+                        Header="Exit" />
+                </MenuItem>
+                <MenuItem Header="Log File">
+                    <MenuItem Name="mnuTest"
+                        Click="MnuTest_Click"
+                        Header="Test Logging" />
+                    <MenuItem Name="mnuViewLog"
+                        Click="MnuViewLog_Click"
+                        Header="View Log File" />
+                </MenuItem>
+                <MenuItem Header="Help">
+                    <MenuItem Name="mnuAbout"
+                        Click="MnuAbout_Click"
+                        Header="About" />
+                    <MenuItem Name="mnuViewReadMe"
+                        Click="MnuViewReadMe_Click"
+                        Header="View ReadMe File" />
+                </MenuItem>
+            </Menu>
+        </DockPanel>
+        <!--#endregion-->
+
+        <!--#region Log File-->
+        <TextBlock
+            Grid.Row="1"
+            Grid.Column="1"
+            Margin="0,10,10,0"
+            VerticalAlignment="Center"
+            Text="Log File Name" />
+        <TextBox
+            Grid.Row="2"
+            Grid.Column="1"
+            Grid.ColumnSpan="4"
+            Height="28"
+            Margin="0,0,0,5"
+            Padding="3,1"
+            VerticalContentAlignment="Center"
+            MaxLength="260"
+            Text="{Binding LogFile, Source={x:Static p:Settings.Default}, Mode=TwoWay}" />
+        <Button x:Name="btnOpenDlg"
+            Grid.Row="2"
+            Grid.Column="3"
+            Grid.ColumnSpan="2"
+            Width="25"
+            Height="28"
+            Margin="0,0,0,5"
+            HorizontalAlignment="Right"
+            Click="BtnOpenDlg_Click"
+            Content="..." />
+        <!--#endregion-->
+
+        <!--#region Drive Types-->
+        <TextBlock
+            Grid.Row="3"
+            Grid.Column="1"
+            Margin="0"
+            VerticalAlignment="Center"
+            Text="Drive Types" />
+        <CheckBox
+            Grid.Row="4"
+            Grid.Column="1"
+            Grid.ColumnSpan="2"
+            Margin="0"
+            VerticalAlignment="Center"
+            VerticalContentAlignment="Center"
+            Content="Fixed"
+            IsChecked="{Binding dtFixed, Source={x:Static p:Settings.Default}}" />
+        <CheckBox
+            Grid.Row="5"
+            Grid.Column="1"
+            Grid.ColumnSpan="2"
+            Margin="0"
+            VerticalAlignment="Center"
+            VerticalContentAlignment="Center"
+            Content="Removable"
+            IsChecked="{Binding dtRemoveable, Source={x:Static p:Settings.Default}}" />
+        <CheckBox
+            Grid.Row="6"
+            Grid.Column="1"
+            Grid.ColumnSpan="2"
+            Margin="0"
+            VerticalAlignment="Center"
+            VerticalContentAlignment="Center"
+            Content="Network"
+            IsChecked="{Binding dtNetwork, Source={x:Static p:Settings.Default}}" />
+        <CheckBox
+            Grid.Row="7"
+            Grid.Column="1"
+            Grid.ColumnSpan="2"
+            Margin="0"
+            VerticalAlignment="Center"
+            VerticalContentAlignment="Center"
+            Content="CDRom"
+            IsChecked="{Binding dtCDRom, Source={x:Static p:Settings.Default}}" />
+        <CheckBox
+            Grid.Row="8"
+            Grid.Column="1"
+            Grid.ColumnSpan="2"
+            Margin="0"
+            VerticalAlignment="Center"
+            VerticalContentAlignment="Center"
+            Content="Ram Disk"
+            IsChecked="{Binding dtRamDisk, Source={x:Static p:Settings.Default}}" />
+        <CheckBox
+            Grid.Row="9"
+            Grid.Column="1"
+            Grid.ColumnSpan="2"
+            Margin="0"
+            VerticalAlignment="Center"
+            VerticalContentAlignment="Center"
+            Content="Unknown"
+            IsChecked="{Binding dtUnknown, Source={x:Static p:Settings.Default}}" />
+        <!--#endregion-->
+
+        <!--#region Decimals-->
+        <TextBlock
+            Grid.Row="3"
+            Grid.Column="3"
+            Margin="0"
+            VerticalAlignment="Center"
+            Text="Decimal Places" />
+        <ComboBox Name="cbxPrecision"
+            Grid.Row="4"
+            Grid.Column="3"
+            Width="120"
+            Height="25"
+            HorizontalAlignment="Left"
+            DisplayMemberPath="Description"
+            SelectedValuePath="Value"
+            SelectionChanged="CbxPrecision_SelectionChanged" />
+        <!--#endregion-->
+
+        <!--#region Time Stamp-->
+        <TextBlock
+            Grid.Row="6"
+            Grid.Column="3"
+            Margin="0"
+            VerticalAlignment="Center"
+            Text="Time Stamp" />
+        <ComboBox Name="cbxTimeStamp"
+            Grid.Row="7"
+            Grid.Column="3"
+            Width="210"
+            Height="25"
+            HorizontalAlignment="Left"
+            DisplayMemberPath="Description"
+            SelectedValuePath="Value"
+            SelectionChanged="CbxTimeStamp_SelectionChanged" />
+        <!--#endregion-->
+
+        <!--#region Brackets-->
+        <CheckBox
+            Grid.Row="9"
+            Grid.Column="3"
+            VerticalAlignment="Center"
+            VerticalContentAlignment="Center"
+            Content="Use brackets around time stamp"
+            IsChecked="{Binding Brackets, Source={x:Static p:Settings.Default}}" />
+        <!--#endregion-->
+
+    </Grid>
+</Window>

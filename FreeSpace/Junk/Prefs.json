@@ -1,0 +1,12 @@
+{
+    "Preferences": {
+        "D_CDRom": "N",
+        "D_Fixed": "Y",
+        "D_Network": "N",
+        "D_Ram": "N",
+        "D_Removable": "Y",
+        "D_Unknown": "N",
+        "Precision": "2",
+        "TimeStamp": "U"
+    }
+}

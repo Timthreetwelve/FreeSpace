@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Preferences>
+  <D_Fixed>Y</D_Fixed>
+  <D_Removable>Y</D_Removable>
+  <D_Network>N</D_Network>
+  <D_CDRom>N</D_CDRom>
+  <D_Ram>N</D_Ram>
+  <D_Unknown>N</D_Unknown>
+  <TimeStamp>U</TimeStamp>
+  <Precision>2</Precision>
+</Preferences>
