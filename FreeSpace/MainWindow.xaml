@@ -26,7 +26,7 @@
             <ColumnDefinition Width="20" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="20" />
+            <RowDefinition Height="24" />
             <RowDefinition Height="35" />
             <RowDefinition Height="40" />
             <RowDefinition Height="25" />
@@ -45,8 +45,12 @@
             Grid.Row="0"
             Grid.Column="0"
             Grid.ColumnSpan="6"
+            Height="24"
             LastChildFill="False">
-            <Menu DockPanel.Dock="Top" FontSize="14">
+            <Menu
+                Height="24"
+                DockPanel.Dock="Top"
+                FontSize="14">
                 <MenuItem Header="File">
                     <MenuItem Name="mnuTaskSched"
                         Click="MnuTaskSched_Click"
@@ -178,7 +182,7 @@
         <ComboBox Name="cbxPrecision"
             Grid.Row="4"
             Grid.Column="3"
-            Width="120"
+            Width="140"
             Height="25"
             HorizontalAlignment="Left"
             DisplayMemberPath="Description"
@@ -192,7 +196,7 @@
             Grid.Column="3"
             Margin="0"
             VerticalAlignment="Center"
-            Text="Time Stamp" />
+            Text="Timestamp" />
         <ComboBox Name="cbxTimeStamp"
             Grid.Row="7"
             Grid.Column="3"

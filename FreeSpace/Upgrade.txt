@@ -1,0 +1,8 @@
+If you are upgrading from a previous version of FreeSpace, please read the following:
+
+This version of FreeSpace has been completely rewritten. It no longer uses a separate app to configure settings. The ReadMe file describes how to set up a task in Task Scheduler.
+
+As you can see, this version of FreeSpace uses an installer where the previous version did not. While it is possible to use both versions concurrently, you may want to delete the previous version.
+
+You may wish to capture a screenshot of the previous version of FreeSpace Settings before deleting it.
+
