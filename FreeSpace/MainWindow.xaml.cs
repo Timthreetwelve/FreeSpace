@@ -4,7 +4,6 @@
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -19,7 +18,7 @@ namespace FreeSpace
     public partial class MainWindow : Window
     {
         #region private variables
-        private readonly Properties.Settings settings = Properties.Settings.Default;
+        private MySettings mySettings;
         private static readonly StringBuilder strDriveInfo = new StringBuilder();
         #endregion private variables
 
@@ -37,28 +36,20 @@ namespace FreeSpace
         #region Read Settings
         private void ReadSettings()
         {
-            if (settings.SettingsUpgradeRequired)
-            {
-                settings.Upgrade();
-                settings.SettingsUpgradeRequired = false;
-                settings.Save();
-                CleanUp.CleanupPrevSettings();
-                Debug.WriteLine("*** SettingsUpgradeRequired");
-            }
-
-            Properties.Settings.Default.SettingChanging += SettingChanging;
-
             Title = AppInfo.AppName + " - " + AppInfo.TitleVersion;
             WriteLog.WriteTempFile($"{AppInfo.AppName} {AppInfo.TitleVersion} is starting up");
 
-            Top = settings.WindowTop;
-            Left = settings.WindowLeft;
+            mySettings = MySettings.Read();
+            DataContext = mySettings;
 
-            if (string.IsNullOrEmpty(settings.LogFile))
+            Top = mySettings.WindowTop;
+            Left = mySettings.WindowLeft;
+
+            if (string.IsNullOrEmpty(mySettings.LogFile))
             {
-                settings.LogFile = Path.Combine(SpecialFolders.GetDesktopFolder(), "FreeSpace.log");
+                mySettings.LogFile = Path.Combine(SpecialFolders.GetDesktopFolder(), "FreeSpace.log");
             }
-            WriteLog.WriteTempFile($"Log file is {settings.LogFile}");
+            WriteLog.WriteTempFile($"Log file is {mySettings.LogFile}");
         }
         #endregion Read Settings
 
@@ -74,42 +65,42 @@ namespace FreeSpace
                 switch (drive.DriveType)
                 {
                     case DriveType.Unknown:
-                        if (settings.dtUnknown && drive.IsReady)
+                        if (mySettings.DtUnknown && drive.IsReady)
                         {
                             FormatLogLine(drive);
                         }
                         break;
 
                     case DriveType.Removable:
-                        if (settings.dtRemoveable && drive.IsReady)
+                        if (mySettings.DtRemovable && drive.IsReady)
                         {
                             FormatLogLine(drive);
                         }
                         break;
 
                     case DriveType.Fixed:
-                        if (settings.dtFixed && drive.IsReady)
+                        if (mySettings.DtFixed && drive.IsReady)
                         {
                             FormatLogLine(drive);
                         }
                         break;
 
                     case DriveType.Network:
-                        if (settings.dtNetwork && drive.IsReady)
+                        if (mySettings.DtNetwork && drive.IsReady)
                         {
                             FormatLogLine(drive);
                         }
                         break;
 
                     case DriveType.CDRom:
-                        if (settings.dtCDRom && drive.IsReady)
+                        if (mySettings.DtCDRom && drive.IsReady)
                         {
                             FormatLogLine(drive);
                         }
                         break;
 
                     case DriveType.Ram:
-                        if (settings.dtRamDisk && drive.IsReady)
+                        if (mySettings.DtRamDisk && drive.IsReady)
                         {
                             FormatLogLine(drive);
                         }
@@ -133,25 +124,25 @@ namespace FreeSpace
             // Convert to GB
             double freeSpace = (drive.TotalFreeSpace / Math.Pow(1024, 3));
 
-            switch (settings.Precision)
+            switch (mySettings.Precision.ToLower())
             {
                 // No decimals, no thousands separator
-                case "NoSep":
+                case "n":
                     strDriveInfo.AppendFormat($"{driveName} {freeSpace,4:###0} GB   ");
                     break;
 
                 // No decimals
-                case "Zero":
+                case "0":
                     strDriveInfo.AppendFormat($"{driveName} {freeSpace,5:N0} GB   ");
                     break;
 
                 // 1 decimal place
-                case "One":
+                case "1":
                     strDriveInfo.AppendFormat($"{driveName} {freeSpace,7:N1} GB   ");
                     break;
 
                 // 2 decimal places
-                case "Two":
+                case "2":
                     strDriveInfo.AppendFormat($"{driveName} {freeSpace,8:N2} GB   ");
                     break;
             }
@@ -164,16 +155,18 @@ namespace FreeSpace
         {
             bool result;
 
-            if (settings.Brackets)
+            if (mySettings.Brackets)
             {
-                result = WriteLog.WriteLogFile(settings.LogFile, strDriveInfo.ToString(), settings.TimeStamp, 'Y');
+                result = WriteLog.WriteLogFile(mySettings.LogFile, strDriveInfo.ToString(), mySettings.TimeStamp, 'Y');
             }
             else
             {
-                result = WriteLog.WriteLogFile(settings.LogFile, strDriveInfo.ToString(), settings.TimeStamp, 'N');
+                result = WriteLog.WriteLogFile(mySettings.LogFile, strDriveInfo.ToString(), mySettings.TimeStamp, 'N');
             }
 
             WriteLog.WriteTempFile(strDriveInfo.ToString());
+
+            strDriveInfo.Clear();
 
             if (!result)
             {
@@ -225,45 +218,12 @@ namespace FreeSpace
         }
         #endregion Command line arguments
 
-        #region Settings change events
-        private void SettingChanging(object sender, SettingChangingEventArgs e)
-        {
-            // Using this method to ensure that text boxes aren't left blank
-            switch (e.SettingName)
-            {
-                case "LogFile":
-                    {
-                        if (string.IsNullOrWhiteSpace(e.NewValue.ToString()))
-                        {
-                            _ = MessageBox.Show(this, "Log file name cannot be blank",
-                                "FreeSpace Error",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Error);
-                            e.Cancel = true;
-                        }
-                        break;
-                    }
-
-                default:
-                    break;
-            }
-
-            Debug.WriteLine($"*** Changing {e.SettingName}, new value: {e.NewValue}");
-
-            // Write settings changes (except window changes) to temp file
-            if (!e.SettingName.StartsWith("Window"))
-            {
-                WriteLog.WriteTempFile($"Changing setting {e.SettingName} to {e.NewValue}");
-            }
-        }
-        #endregion Settings change events
-
         #region Window events
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            Properties.Settings.Default.WindowLeft = Left;
-            Properties.Settings.Default.WindowTop = Top;
-            Properties.Settings.Default.Save();
+            mySettings.WindowLeft = Left;
+            mySettings.WindowTop = Top;
+            MySettings.Save(mySettings);
 
             WriteLog.WriteTempFile($"{AppInfo.AppName} is shutting down");
         }
@@ -279,14 +239,14 @@ namespace FreeSpace
                 Multiselect = false,
                 Filter = "All files|*.*"
             };
-            if (!string.IsNullOrEmpty(settings.LogFile))
+            if (!string.IsNullOrEmpty(mySettings.LogFile))
             {
-                dlgOpen.FileName = settings.LogFile;
+                dlgOpen.FileName = mySettings.LogFile;
             }
             bool? result = dlgOpen.ShowDialog();
             if (result == true)
             {
-                settings.LogFile = dlgOpen.FileName;
+                mySettings.LogFile = dlgOpen.FileName;
             }
         }
         #endregion Window events
@@ -310,21 +270,21 @@ namespace FreeSpace
                 new TimeStamp { Description = "dd MMM yyyy HH:mm:ss", Value = 'M' }
             };
             cbxTimeStamp.ItemsSource = tslist;
-            cbxTimeStamp.SelectedValue = settings.TimeStamp;
+            cbxTimeStamp.SelectedValue = mySettings.TimeStamp;
         }
 
         private void InitializePrecisionCombobox()
         {
             List<PrecisionClass> plist = new List<PrecisionClass>
             {
-                new PrecisionClass { Description = "0 - 9,999 GB", Value = "Zero" },
-                new PrecisionClass { Description = "1 - 9,999.9 GB", Value = "One" },
-                new PrecisionClass { Description = "2 - 9,999.99 GB", Value = "Two" },
-                new PrecisionClass { Description = "No Separator", Value = "NoSep" }
+                new PrecisionClass { Description = "0 - 9,999 GB", Value = "0" },
+                new PrecisionClass { Description = "1 - 9,999.9 GB", Value = "1" },
+                new PrecisionClass { Description = "2 - 9,999.99 GB", Value = "2" },
+                new PrecisionClass { Description = "No Separator", Value = "n" }
             };
 
             cbxPrecision.ItemsSource = plist;
-            cbxPrecision.SelectedValue = settings.Precision;
+            cbxPrecision.SelectedValue = mySettings.Precision;
         }
         #endregion Initialize combo boxes
 
@@ -334,7 +294,7 @@ namespace FreeSpace
             if (cbxPrecision.SelectedItem != null)
             {
                 PrecisionClass x = (PrecisionClass)cbxPrecision.SelectedItem;
-                settings.Precision = x.Value;
+                mySettings.Precision = x.Value;
             }
         }
 
@@ -343,7 +303,7 @@ namespace FreeSpace
             if (cbxTimeStamp.SelectedItem != null)
             {
                 TimeStamp x = (TimeStamp)cbxTimeStamp.SelectedItem;
-                settings.TimeStamp = x.Value;
+                mySettings.TimeStamp = x.Value;
             }
         }
         #endregion Combo box events
@@ -356,15 +316,15 @@ namespace FreeSpace
 
         private void MnuTest_Click(object sender, RoutedEventArgs e)
         {
-            settings.Save();
+            MySettings.Save(mySettings);
             GetDriveInfo();
             WriteToLog();
-            TextFileViewer.ViewTextFile(settings.LogFile);
+            TextFileViewer.ViewTextFile(mySettings.LogFile);
         }
 
         private void MnuViewLog_Click(object sender, RoutedEventArgs e)
         {
-            TextFileViewer.ViewTextFile(settings.LogFile);
+            TextFileViewer.ViewTextFile(mySettings.LogFile);
         }
 
         private void MnuAbout_Click(object sender, RoutedEventArgs e)
