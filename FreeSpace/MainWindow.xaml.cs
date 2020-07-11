@@ -36,6 +36,9 @@ namespace FreeSpace
         #region Read Settings
         private void ReadSettings()
         {
+            AppDomain.CurrentDomain.UnhandledException +=
+                new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+
             Title = AppInfo.AppName + " - " + AppInfo.TitleVersion;
             WriteLog.WriteTempFile($"{AppInfo.AppName} {AppInfo.TitleVersion} is starting up");
 
@@ -352,5 +355,16 @@ namespace FreeSpace
             }
         }
         #endregion Menu events
+
+        #region Unhandled Exception Handler
+        static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs args)
+        {
+            WriteLog.WriteTempFile($"Unhandled Exception");
+            Exception e = (Exception)args.ExceptionObject;
+            WriteLog.WriteTempFile(e.Message);
+            WriteLog.WriteTempFile(e.InnerException.ToString());
+            WriteLog.WriteTempFile(e.StackTrace);
+        }
+        #endregion
     }
 }

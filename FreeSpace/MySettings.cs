@@ -8,6 +8,8 @@ using System.Reflection;
 using System.Diagnostics;
 using System.ComponentModel;
 using Newtonsoft.Json;
+using TKUtils;
+using System.Windows;
 #endregion
 
 namespace FreeSpace
@@ -35,6 +37,8 @@ namespace FreeSpace
         private bool dtUnknown;
         #endregion
 
+        [DefaultValue(100)]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public double WindowTop
         {
             get { return windowTop; }
@@ -45,6 +49,8 @@ namespace FreeSpace
             }
         }
 
+        [DefaultValue(100)]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public double WindowLeft
         {
             get { return windowLeft; }
@@ -65,6 +71,8 @@ namespace FreeSpace
             }
         }
 
+        [DefaultValue("1")]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public string Precision
         {
             get { return precision; }
@@ -75,6 +83,8 @@ namespace FreeSpace
             }
         }
 
+        [DefaultValue('S')]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public char TimeStamp
         {
             get { return timeStamp; }
@@ -85,6 +95,8 @@ namespace FreeSpace
             }
         }
 
+        [DefaultValue(false)]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public bool Brackets
         {
             get { return brackets; }
@@ -95,6 +107,8 @@ namespace FreeSpace
             }
         }
 
+        [DefaultValue(true)]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public bool DtFixed
         {
             get { return dtfixed; }
@@ -105,6 +119,8 @@ namespace FreeSpace
             }
         }
 
+        [DefaultValue(false)]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public bool DtRemovable
         {
             get { return dtRemovable; }
@@ -115,6 +131,8 @@ namespace FreeSpace
             }
         }
 
+        [DefaultValue(false)]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public bool DtNetwork
         {
             get { return dtNetwork; }
@@ -125,6 +143,8 @@ namespace FreeSpace
             }
         }
 
+        [DefaultValue(false)]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public bool DtCDRom
         {
             get { return dtCDRom; }
@@ -135,6 +155,8 @@ namespace FreeSpace
             }
         }
 
+        [DefaultValue(false)]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public bool DtRamDisk
         {
             get { return dtRamDisk; }
@@ -145,6 +167,8 @@ namespace FreeSpace
             }
         }
 
+        [DefaultValue(false)]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public bool DtUnknown
         {
             get { return dtUnknown; }
@@ -183,8 +207,24 @@ namespace FreeSpace
             {
                 filename = DefaultSettingsFile();
             }
-            string rawJSON = File.ReadAllText(filename);
-            return JsonConvert.DeserializeObject<MySettings>(rawJSON);
+            if (!File.Exists(filename))
+            {
+                WriteLog.WriteTempFile($"Settings file not found - Creating");
+                CreateEmptySettingsFile(filename);
+            }
+            try
+            {
+                string rawJSON = File.ReadAllText(filename);
+                return JsonConvert.DeserializeObject<MySettings>(rawJSON);
+            }
+            catch (Exception ex)
+            {
+                WriteLog.WriteTempFile($"Settings file could not be read - cannot continue");
+                WriteLog.WriteTempFile($"Error reading {filename}");
+                WriteLog.WriteTempFile($"{ex}");
+                Application.Current.Shutdown();
+                return null;
+            }
         }
         #endregion
 
@@ -202,12 +242,13 @@ namespace FreeSpace
             }
             if (!File.Exists(filename))
             {
-                Debug.WriteLine($"{filename} not found");
+                WriteLog.WriteTempFile($"Settings file not found - cannot save settings");
+                WriteLog.WriteTempFile($"{filename} - not found");
                 return;
             }
             else
             {
-                Debug.WriteLine($"Saving settings to {filename}");
+                WriteLog.WriteTempFile($"Saving settings to {filename}");
             }
             try
             {
@@ -216,7 +257,8 @@ namespace FreeSpace
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Saving {filename} failed\n{ex}");
+                WriteLog.WriteTempFile($"Settings could not be saved");
+                WriteLog.WriteTempFile($"{ex}");
             }
         }
         #endregion
@@ -245,6 +287,21 @@ namespace FreeSpace
         {
             string dir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             return Path.Combine(dir, "settings.json");
+        }
+
+        private static void CreateEmptySettingsFile(string filename)
+        {
+            try
+            {
+                File.WriteAllText(filename, "{ }");
+                WriteLog.WriteTempFile($"{filename} - Created");
+            }
+            catch (Exception ex)
+            {
+                WriteLog.WriteTempFile($"Settings file could not be created - cannot continue");
+                WriteLog.WriteTempFile($"{ex}");
+                Environment.Exit(1);
+            }
         }
         #endregion
     }

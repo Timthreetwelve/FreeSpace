@@ -37,7 +37,7 @@ namespace TKUtils
                         p.StartInfo.UseShellExecute = true;
                         p.StartInfo.ErrorDialog = false;
                         _ = p.Start();
-                        WriteLog.WriteTempFile($"  Opening {txtfile} in default application");
+                        WriteLog.WriteTempFile($"Opening {txtfile} in default application");
                     }
                 }
                 catch (Win32Exception ex)
@@ -51,7 +51,7 @@ namespace TKUtils
                             p.StartInfo.UseShellExecute = true;
                             p.StartInfo.ErrorDialog = false;
                             _ = p.Start();
-                            WriteLog.WriteTempFile($"  Opening {txtfile} in Notepad.exe");
+                            WriteLog.WriteTempFile($"Opening {txtfile} in Notepad.exe");
                         }
                     }
                     else
