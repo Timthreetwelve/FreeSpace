@@ -3,38 +3,41 @@
 
 Introduction
 ============
-
-FreeSpace is a program that will list the amount of free space available on your disk drives that are in Ready status
-and match the drive types specified. The amount of free space will be written to a log file that you specify.
+FreeSpace is a program that will list the amount of free space available on your disk drives that
+are in Ready status and match the drive types specified. The amount of free space will be written
+to a log file that you specify.
 
 
 Using FreeSpace
 ===============
+When FreeSpace is first run you will notice that the log file name has defaulted to FreeSpace.log
+on the desktop. Change the directory and filename to something that works for you. Below that on
+the left are drive types. Select each type that you wish to report on. To the right are options
+for how the log file is formatted. Select the number of decimal places, the format of the timestamp
+and if you want the timestamp surrounded by square brackets.
 
-When FreeSpace is first run you will notice that the log file name has defaulted to FreeSpace.log on the desktop. Change
-the directory and filename to something that works for you. Below that on the left are drive types. Select each type that
-you wish to report on. To the right are options for how the log file is formatted. Select the number of decimal places,
-the format of the timestamp and if you want the timestamp surrounded by square brackets.
-
-The Log File menu contains an item to test the logging to check formatting, etc. There is also an entry to view the
-specified log file.
+The Log File menu contains an item to test the logging to check formatting, etc. There is also an
+entry to view the specified log file.
 
 
 Automating FreeSpace
 ====================
-
-The File menu has a selection to start the Window Task Scheduler. When setting up a task supply the full path to
-FreeSpace.exe and then specify /write as an argument. Doing so will cause FreeSpace to write the free space information
-to the log file and exit without showing the FreeSpace window.
+The File menu has a selection to start the Window Task Scheduler. When setting up a task supply the
+full path to FreeSpace.exe and then specify /write as an argument. Doing so will cause FreeSpace to
+write the free space information to the log file and exit without showing the FreeSpace window.
 
 
 Notices and License
 ===================
-
 FreeSpace was written in C# by Tim Kennedy.
 
+FreeSpace uses the following icons & packages:
+
+Json.net v12.0.3 from Newtonsoft https://www.newtonsoft.com/json
+
+
 MIT License
-Copyright (c) 2020 Tim Kennedy
+Copyright (c) 2021 Tim Kennedy
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 associated documentation files (the "Software"), to deal in the Software without restriction, including
