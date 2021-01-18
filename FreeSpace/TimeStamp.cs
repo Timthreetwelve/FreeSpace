@@ -2,7 +2,7 @@
 
 namespace FreeSpace
 {
-    class TimeStamp
+    public class TimeStamp
     {
         public string Description { get; set; }
 

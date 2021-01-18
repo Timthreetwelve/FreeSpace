@@ -18,12 +18,13 @@ namespace FreeSpace
     public partial class MainWindow : Window
     {
         #region private variables
-        private MySettings mySettings;
         private static readonly StringBuilder strDriveInfo = new StringBuilder();
         #endregion private variables
 
         public MainWindow()
         {
+            UserSettings.Init(UserSettings.AppFolder, UserSettings.DefaultFilename, true);
+
             InitializeComponent();
 
             ReadSettings();
@@ -36,23 +37,19 @@ namespace FreeSpace
         #region Read Settings
         private void ReadSettings()
         {
-            AppDomain.CurrentDomain.UnhandledException +=
-                new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
             Title = AppInfo.AppName + " - " + AppInfo.TitleVersion;
             WriteLog.WriteTempFile($"{AppInfo.AppName} {AppInfo.TitleVersion} is starting up");
 
-            mySettings = MySettings.Read();
-            DataContext = mySettings;
+            Top = UserSettings.Setting.WindowTop;
+            Left = UserSettings.Setting.WindowLeft;
 
-            Top = mySettings.WindowTop;
-            Left = mySettings.WindowLeft;
-
-            if (string.IsNullOrEmpty(mySettings.LogFile))
+            if (string.IsNullOrEmpty(UserSettings.Setting.LogFile))
             {
-                mySettings.LogFile = Path.Combine(SpecialFolders.GetDesktopFolder(), "FreeSpace.log");
+                UserSettings.Setting.LogFile = Path.Combine(SpecialFolders.GetDesktopFolder(), "FreeSpace.log");
             }
-            WriteLog.WriteTempFile($"Log file is {mySettings.LogFile}");
+            WriteLog.WriteTempFile($"Log file is {UserSettings.Setting.LogFile}");
         }
         #endregion Read Settings
 
@@ -60,55 +57,52 @@ namespace FreeSpace
         private void GetDriveInfo()
         {
             // DriveInfo gets the particulars for each drive
-            DriveInfo[] drives = DriveInfo.GetDrives();
-
-            foreach (DriveInfo drive in drives)
+            foreach (DriveInfo drive in DriveInfo.GetDrives())
             {
                 // Determine if drive type is ready and if the type is wanted
                 switch (drive.DriveType)
                 {
                     case DriveType.Unknown:
-                        if (mySettings.DtUnknown && drive.IsReady)
+                        if (UserSettings.Setting.DtUnknown && drive.IsReady)
                         {
                             FormatLogLine(drive);
                         }
                         break;
 
                     case DriveType.Removable:
-                        if (mySettings.DtRemovable && drive.IsReady)
+                        if (UserSettings.Setting.DtRemovable && drive.IsReady)
                         {
                             FormatLogLine(drive);
                         }
                         break;
 
                     case DriveType.Fixed:
-                        if (mySettings.DtFixed && drive.IsReady)
+                        if (UserSettings.Setting.DtFixed && drive.IsReady)
                         {
                             FormatLogLine(drive);
                         }
                         break;
 
                     case DriveType.Network:
-                        if (mySettings.DtNetwork && drive.IsReady)
+                        if (UserSettings.Setting.DtNetwork && drive.IsReady)
                         {
                             FormatLogLine(drive);
                         }
                         break;
 
                     case DriveType.CDRom:
-                        if (mySettings.DtCDRom && drive.IsReady)
+                        if (UserSettings.Setting.DtCDRom && drive.IsReady)
                         {
                             FormatLogLine(drive);
                         }
                         break;
 
                     case DriveType.Ram:
-                        if (mySettings.DtRamDisk && drive.IsReady)
+                        if (UserSettings.Setting.DtRamDisk && drive.IsReady)
                         {
                             FormatLogLine(drive);
                         }
                         break;
-
                     default:
                         Debug.WriteLine("Switch statement fell through to default");
                         break;
@@ -118,7 +112,6 @@ namespace FreeSpace
         #endregion Get info from each drive that is "ready"
 
         #region Format the free space amount
-
         private void FormatLogLine(DriveInfo drive)
         {
             // Trim the trailing backslash
@@ -127,7 +120,7 @@ namespace FreeSpace
             // Convert to GB
             double freeSpace = (drive.TotalFreeSpace / Math.Pow(1024, 3));
 
-            switch (mySettings.Precision.ToLower())
+            switch (UserSettings.Setting.Precision.ToLower())
             {
                 // No decimals, no thousands separator
                 case "n":
@@ -150,7 +143,6 @@ namespace FreeSpace
                     break;
             }
         }
-
         #endregion Format the free space amount
 
         #region Write to log file
@@ -158,13 +150,15 @@ namespace FreeSpace
         {
             bool result;
 
-            if (mySettings.Brackets)
+            if (UserSettings.Setting.Brackets)
             {
-                result = WriteLog.WriteLogFile(mySettings.LogFile, strDriveInfo.ToString(), mySettings.TimeStamp, 'Y');
+                result = WriteLog.WriteLogFile(UserSettings.Setting.LogFile, strDriveInfo.ToString(),
+                                               UserSettings.Setting.TimeStamp, 'Y');
             }
             else
             {
-                result = WriteLog.WriteLogFile(mySettings.LogFile, strDriveInfo.ToString(), mySettings.TimeStamp, 'N');
+                result = WriteLog.WriteLogFile(UserSettings.Setting.LogFile, strDriveInfo.ToString(),
+                                               UserSettings.Setting.TimeStamp, 'N');
             }
 
             WriteLog.WriteTempFile(strDriveInfo.ToString());
@@ -203,19 +197,16 @@ namespace FreeSpace
                     // hide the window
                     Visibility = Visibility.Hidden;
 
-                    // Only write so log file when the window is hidden
+                    // Only write to log file when the window is hidden
                     GetDriveInfo();
                     WriteToLog();
 
                     // Shutdown after the log file was written to
                     Application.Current.Shutdown();
                 }
-                else
+                else if (item != args[0])
                 {
-                    if (item != args[0])
-                    {
-                        WriteLog.WriteTempFile($"Unknown command line argument  \"{item}\" found.");
-                    }
+                    WriteLog.WriteTempFile($"Unknown command line argument  \"{item}\" found.");
                 }
             }
         }
@@ -224,9 +215,9 @@ namespace FreeSpace
         #region Window events
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            mySettings.WindowLeft = Left;
-            mySettings.WindowTop = Top;
-            MySettings.Save(mySettings);
+            UserSettings.Setting.WindowLeft = Left;
+            UserSettings.Setting.WindowTop = Top;
+            UserSettings.SaveSettings();
 
             WriteLog.WriteTempFile($"{AppInfo.AppName} is shutting down");
         }
@@ -242,14 +233,14 @@ namespace FreeSpace
                 Multiselect = false,
                 Filter = "All files|*.*"
             };
-            if (!string.IsNullOrEmpty(mySettings.LogFile))
+            if (!string.IsNullOrEmpty(UserSettings.Setting.LogFile))
             {
-                dlgOpen.FileName = mySettings.LogFile;
+                dlgOpen.FileName = UserSettings.Setting.LogFile;
             }
             bool? result = dlgOpen.ShowDialog();
             if (result == true)
             {
-                mySettings.LogFile = dlgOpen.FileName;
+                UserSettings.Setting.LogFile = dlgOpen.FileName;
             }
         }
         #endregion Window events
@@ -264,7 +255,7 @@ namespace FreeSpace
 
         private void InitializeTimestampCombobox()
         {
-            List<TimeStamp> tslist = new List<TimeStamp>
+            cbxTimeStamp.ItemsSource = new List<TimeStamp>
             {
                 new TimeStamp { Description = "MM/dd/yy HH:mm", Value = 'S' },
                 new TimeStamp { Description = "MM/dd/yyyy HH:mm:ss", Value = 'U' },
@@ -272,22 +263,19 @@ namespace FreeSpace
                 new TimeStamp { Description = "yyyy/MM/dd HH:mm:ss", Value = 'E' },
                 new TimeStamp { Description = "dd MMM yyyy HH:mm:ss", Value = 'M' }
             };
-            cbxTimeStamp.ItemsSource = tslist;
-            cbxTimeStamp.SelectedValue = mySettings.TimeStamp;
+            cbxTimeStamp.SelectedValue = UserSettings.Setting.TimeStamp;
         }
 
         private void InitializePrecisionCombobox()
         {
-            List<PrecisionClass> plist = new List<PrecisionClass>
+            cbxPrecision.ItemsSource = new List<PrecisionClass>
             {
                 new PrecisionClass { Description = "0 - 9,999 GB", Value = "0" },
                 new PrecisionClass { Description = "1 - 9,999.9 GB", Value = "1" },
                 new PrecisionClass { Description = "2 - 9,999.99 GB", Value = "2" },
                 new PrecisionClass { Description = "No Separator", Value = "n" }
             };
-
-            cbxPrecision.ItemsSource = plist;
-            cbxPrecision.SelectedValue = mySettings.Precision;
+            cbxPrecision.SelectedValue = UserSettings.Setting.Precision;
         }
         #endregion Initialize combo boxes
 
@@ -297,7 +285,7 @@ namespace FreeSpace
             if (cbxPrecision.SelectedItem != null)
             {
                 PrecisionClass x = (PrecisionClass)cbxPrecision.SelectedItem;
-                mySettings.Precision = x.Value;
+                UserSettings.Setting.Precision = x.Value;
             }
         }
 
@@ -306,7 +294,7 @@ namespace FreeSpace
             if (cbxTimeStamp.SelectedItem != null)
             {
                 TimeStamp x = (TimeStamp)cbxTimeStamp.SelectedItem;
-                mySettings.TimeStamp = x.Value;
+                UserSettings.Setting.TimeStamp = x.Value;
             }
         }
         #endregion Combo box events
@@ -319,15 +307,15 @@ namespace FreeSpace
 
         private void MnuTest_Click(object sender, RoutedEventArgs e)
         {
-            MySettings.Save(mySettings);
+            UserSettings.SaveSettings();
             GetDriveInfo();
             WriteToLog();
-            TextFileViewer.ViewTextFile(mySettings.LogFile);
+            TextFileViewer.ViewTextFile(UserSettings.Setting.LogFile);
         }
 
         private void MnuViewLog_Click(object sender, RoutedEventArgs e)
         {
-            TextFileViewer.ViewTextFile(mySettings.LogFile);
+            TextFileViewer.ViewTextFile(UserSettings.Setting.LogFile);
         }
 
         private void MnuAbout_Click(object sender, RoutedEventArgs e)
@@ -357,9 +345,9 @@ namespace FreeSpace
         #endregion Menu events
 
         #region Unhandled Exception Handler
-        static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs args)
+        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs args)
         {
-            WriteLog.WriteTempFile($"Unhandled Exception");
+            WriteLog.WriteTempFile("Unhandled Exception");
             Exception e = (Exception)args.ExceptionObject;
             WriteLog.WriteTempFile(e.Message);
             WriteLog.WriteTempFile(e.InnerException.ToString());

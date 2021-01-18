@@ -11,7 +11,6 @@ using System.IO;
 using System.Windows;
 #endregion
 
-
 namespace TKUtils
 {
     /// <summary>
@@ -67,7 +66,7 @@ namespace TKUtils
                 catch (Exception ex)
                 {
 #if messagebox
-                    _ = MessageBox.Show($"Unable to start default application used to open" +
+                    _ = MessageBox.Show("Unable to start default application used to open" +
                 $" {txtfile}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 #endif
                     WriteLog.WriteTempFile($"* Unable to open {txtfile}");
