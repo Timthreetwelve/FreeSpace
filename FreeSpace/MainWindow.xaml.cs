@@ -5,13 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
 using Microsoft.Win32;
 using TKUtils;
@@ -148,31 +147,37 @@ namespace FreeSpace
             int GBPref = UserSettings.Setting.Use1024 ? 1024 : 1000;
             double freeSpace = drive.TotalFreeSpace / Math.Pow(GBPref, 3);
 
+            CultureInfo culture = CultureInfo.CurrentCulture;
+            string free;
             switch (UserSettings.Setting.Precision.ToLower())
             {
                 // No decimals, no thousands separator
                 case "n":
-                    _ = strDriveInfo.AppendFormat($"{driveName} {freeSpace,4:###0} GB   ");
+                    _ = strDriveInfo.AppendFormat(culture, $"{driveName} {freeSpace,4:###0} GB   ");
                     break;
 
                 // No decimals
                 case "0":
-                    _ = strDriveInfo.AppendFormat($"{driveName} {freeSpace,5:N0} GB   ");
+                    free = string.Format(culture, "{0,5:N0}", freeSpace);
+                    _ = strDriveInfo.AppendFormat(culture, $"{driveName} {free} GB   ");
                     break;
 
                 // 1 decimal place
                 case "1":
-                    _ = strDriveInfo.AppendFormat($"{driveName} {freeSpace,7:N1} GB   ");
-                    break;
-
-                // 3 decimal places
-                case "2":
-                    _ = strDriveInfo.AppendFormat($"{driveName} {freeSpace,8:N2} GB   ");
+                    free = string.Format(culture, "{0,7:N1}", freeSpace);
+                    _ = strDriveInfo.AppendFormat(culture, $"{driveName} {free} GB   ");
                     break;
 
                 // 2 decimal places
+                case "2":
+                    free = string.Format(culture, "{0,8:N2}", freeSpace);
+                    _ = strDriveInfo.AppendFormat(culture, $"{driveName} {free} GB   ");
+                    break;
+
+                // 3 decimal places
                 case "3":
-                    _ = strDriveInfo.AppendFormat($"{driveName} {freeSpace,9:N3} GB   ");
+                    free = string.Format(culture, "{0,9:N3}", freeSpace);
+                    _ = strDriveInfo.AppendFormat(culture, $"{driveName} {free} GB   ");
                     break;
             }
         }
@@ -369,19 +374,22 @@ namespace FreeSpace
                 PrecisionClass x = (PrecisionClass)cbxPrecision.SelectedItem;
                 UserSettings.Setting.Precision = x.Value;
 
+                const double demo = 1234.123;
+                CultureInfo culture = CultureInfo.CurrentCulture;
+
                 switch (UserSettings.Setting.Precision)
                 {
                     case "0":
-                        tbDPlaces.Text = "1,234 GB";
+                        tbDPlaces.Text = demo.ToString("N0", culture) + " GB";
                         break;
                     case "1":
-                        tbDPlaces.Text = "1,234.5 GB";
+                        tbDPlaces.Text = demo.ToString("N1", culture) + " GB";
                         break;
                     case "2":
-                        tbDPlaces.Text = "1,234.56 GB";
+                        tbDPlaces.Text = demo.ToString("N2", culture) + " GB";
                         break;
                     case "3":
-                        tbDPlaces.Text = "1,234.567 GB";
+                        tbDPlaces.Text = demo.ToString("N3", culture) + " GB";
                         break;
                     case "n":
                         tbDPlaces.Text = "1234 GB";
