@@ -13,8 +13,9 @@ Using FreeSpace
 When FreeSpace is first run you will notice that the log file name has defaulted to FreeSpace.log
 on the desktop. Change the directory and filename to something that works for you. Below that on
 the left are drive types. Select each type that you wish to report on. To the right are options
-for how the log file is formatted. Select the number of decimal places, the format of the timestamp
-and if you want the timestamp surrounded by square brackets.
+for how the log file is formatted. Select the number of decimal places, the format of the timestamp,
+whether you want to use 1000^3 or 1024^3 to be used as the definition of GB, and if you want the
+timestamp surrounded by square brackets.
 
 The Log File menu contains an item to test the logging to check formatting, etc. There is also an
 entry to view the specified log file.
@@ -22,7 +23,7 @@ entry to view the specified log file.
 
 Automating FreeSpace
 ====================
-The File menu has a selection to start the Window Task Scheduler. When setting up a task supply the
+The File menu has a selection to start the Window Task Scheduler. When setting up a task, supply the
 full path to FreeSpace.exe and then specify /write as an argument. Doing so will cause FreeSpace to
 write the free space information to the log file and exit without showing the FreeSpace window.
 
