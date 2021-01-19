@@ -21,6 +21,7 @@ namespace FreeSpace
             DtUnknown = false;
             Precision = "1";
             TimeStamp = 'S';
+            Use1024 = true;
             WindowLeft = 100;
             WindowTop = 100;
         }
@@ -125,6 +126,16 @@ namespace FreeSpace
             }
         }
 
+        public bool Use1024
+        {
+            get => use1024;
+            set
+            {
+                use1024 = value;
+                OnPropertyChanged();
+            }
+        }
+
         public double WindowLeft
         {
             get
@@ -163,6 +174,7 @@ namespace FreeSpace
         private string logFile;
         private string precision;
         private char timeStamp;
+        private bool use1024;
         private double windowTop;
         private double windowLeft;
         #endregion Private backing fields

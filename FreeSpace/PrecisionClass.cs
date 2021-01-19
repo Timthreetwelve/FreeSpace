@@ -2,7 +2,7 @@
 
 namespace FreeSpace
 {
-    class PrecisionClass
+    internal class PrecisionClass
     {
         public string Description { get; set; }
 

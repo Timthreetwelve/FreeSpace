@@ -30,14 +30,14 @@
             <RowDefinition Height="24" />
             <RowDefinition Height="35" />
             <RowDefinition Height="40" />
-            <RowDefinition Height="25" />
-            <RowDefinition Height="25" />
-            <RowDefinition Height="25" />
-            <RowDefinition Height="25" />
-            <RowDefinition Height="25" />
-            <RowDefinition Height="25" />
-            <RowDefinition Height="25" />
             <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="20" />
         </Grid.RowDefinitions>
         <!--#endregion-->
 
@@ -51,7 +51,7 @@
             <Menu
                 Height="24"
                 DockPanel.Dock="Top"
-                FontSize="14">
+                FontSize="15">
                 <MenuItem Header="File">
                     <MenuItem
                         Name="mnuTaskSched"
@@ -127,7 +127,6 @@
         <CheckBox
             Grid.Row="4"
             Grid.Column="1"
-           
             Margin="0"
             VerticalAlignment="Center"
             VerticalContentAlignment="Center"
@@ -136,7 +135,6 @@
         <CheckBox
             Grid.Row="5"
             Grid.Column="1"
-           
             Margin="0"
             VerticalAlignment="Center"
             VerticalContentAlignment="Center"
@@ -145,7 +143,6 @@
         <CheckBox
             Grid.Row="6"
             Grid.Column="1"
-           
             Margin="0"
             VerticalAlignment="Center"
             VerticalContentAlignment="Center"
@@ -154,7 +151,6 @@
         <CheckBox
             Grid.Row="7"
             Grid.Column="1"
-           
             Margin="0"
             VerticalAlignment="Center"
             VerticalContentAlignment="Center"
@@ -163,7 +159,6 @@
         <CheckBox
             Grid.Row="8"
             Grid.Column="1"
-           
             Margin="0"
             VerticalAlignment="Center"
             VerticalContentAlignment="Center"
@@ -172,7 +167,6 @@
         <CheckBox
             Grid.Row="9"
             Grid.Column="1"
-           
             Margin="0"
             VerticalAlignment="Center"
             VerticalContentAlignment="Center"
@@ -181,41 +175,78 @@
         <!--#endregion-->
 
         <!--#region Decimals-->
-        <TextBlock
+        <StackPanel
             Grid.Row="3"
             Grid.Column="3"
-            Margin="0"
-            VerticalAlignment="Center"
-            Text="Decimal Places" />
-        <ComboBox
-            Name="cbxPrecision"
+            Orientation="Horizontal">
+            <TextBlock
+                Margin="0"
+                VerticalAlignment="Center"
+                Text="Decimal Places" />
+            <TextBlock
+                Margin="50,0,0,0"
+                VerticalAlignment="Center"
+                Text="Example" />
+        </StackPanel>
+        <StackPanel
             Grid.Row="4"
             Grid.Column="3"
-            Width="140"
-            Height="25"
-            HorizontalAlignment="Left"
-            DisplayMemberPath="Description"
-            SelectedValuePath="Value"
-            SelectionChanged="CbxPrecision_SelectionChanged" />
+            Orientation="Horizontal">
+            <ComboBox
+                Name="cbxPrecision"
+                Width="120"
+                Height="25"
+                HorizontalContentAlignment="Left"
+                DisplayMemberPath="Description"
+                SelectedValuePath="Value"
+                SelectionChanged="CbxPrecision_SelectionChanged" />
+            <TextBlock
+                x:Name="tbDPlaces"
+                Margin="30,0,0,0"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center" />
+        </StackPanel>
         <!--#endregion-->
 
         <!--#region Time Stamp-->
         <TextBlock
-            Grid.Row="6"
+            Grid.Row="5"
             Grid.Column="3"
             Margin="0"
             VerticalAlignment="Center"
             Text="Timestamp" />
         <ComboBox
             Name="cbxTimeStamp"
-            Grid.Row="7"
+            Grid.Row="6"
             Grid.Column="3"
             Width="210"
             Height="25"
             HorizontalAlignment="Left"
+            VerticalAlignment="Top"
             DisplayMemberPath="Description"
             SelectedValuePath="Value"
             SelectionChanged="CbxTimeStamp_SelectionChanged" />
+        <!--#endregion-->
+
+        <!--#region GiB-->
+        <RadioButton
+            x:Name="chkGiB"
+            Grid.Row="7"
+            Grid.Column="3"
+            VerticalAlignment="Center"
+            VerticalContentAlignment="Center"
+            Content="GB is 1024^3 bytes"
+            IsChecked="{Binding Use1024, Source={x:Static local:UserSettings.Setting}}" />
+        <!--#endregion-->
+
+        <!--#region GB-->
+        <RadioButton
+            x:Name="chkGB"
+            Grid.Row="8"
+            Grid.Column="3"
+            VerticalAlignment="Center"
+            VerticalContentAlignment="Center"
+            Content="GB  is 1000^3 bytes" />
         <!--#endregion-->
 
         <!--#region Brackets-->
@@ -225,8 +256,7 @@
             VerticalAlignment="Center"
             VerticalContentAlignment="Center"
             Content="Use brackets around time stamp"
-            IsChecked="{Binding Brackets}" />
+            IsChecked="{Binding Brackets, Source={x:Static local:UserSettings.Setting}}" />
         <!--#endregion-->
-
     </Grid>
 </Window>

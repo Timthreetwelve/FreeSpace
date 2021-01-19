@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Tim Kennedy. All Rights Reserved. Licensed under the MIT License.
 
 #region using directives
-
 using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-
 #endregion using directives
 
 namespace TKUtils
@@ -17,16 +15,13 @@ namespace TKUtils
     public static class WriteLog
     {
         #region WL Message
-
         /// <summary>
         ///  Success or failure message string from the WriteLog class
         /// </summary>
         public static string WLMessage { get; set; }
-
         #endregion WL Message
 
         #region Write Log File
-
         /// <Summary>Writes to a log file. This overload is used when a time stamp is desired.</Summary>
         /// <param name="path">Path to log file</param>
         /// <param name="message">String to be written to log file</param>
@@ -75,11 +70,9 @@ namespace TKUtils
             }
             return false;
         }
-
         #endregion Write Log File
 
         #region Write Temp File
-
         /// <Summary>Writes a string to a file in the user's Temp directory</Summary>
         /// <param name="msg">String to be written to temp file</param>
         /// <param name="filename">Optional file name</param>
@@ -87,11 +80,9 @@ namespace TKUtils
         {
             WriteLogFile(GetTempFile(filename), msg, 'U', 'N');
         }
-
         #endregion Write Temp File
 
         #region Validate File Path
-
         /// <summary>
         ///  Validates that are no invalid characters, the drive exists, etc. Check
         ///  WriteLog.WLMessage for errors
@@ -169,11 +160,9 @@ namespace TKUtils
             WLMessage = "OK";
             return true;
         }
-
         #endregion Validate File Path
 
         #region Get Temp File Name
-
         /// <Summary>Gets a file name for a file in the user's temp directory</Summary>
         /// <param name="filename">Optional file name</param>
         public static string GetTempFile(string filename = "default")
@@ -196,12 +185,9 @@ namespace TKUtils
 
             return Path.Combine(path, filename);
         }
-
         #endregion Get Temp File Name
 
         #region Private Helper Methods
-
-        // If the log file doesn't exist create it
         private static bool CheckLogFile(string path, char tstype, char brackets)
         {
             if (!File.Exists(path))
@@ -215,14 +201,13 @@ namespace TKUtils
                 {
                     string CreatedMsg = string.Format("{0}This log file created by {1}" + Environment.NewLine,
                             FormatTimeStamp(tstype, brackets), GetExeName());
-                    File.WriteAllText(path, CreatedMsg.ToString());
+                    File.WriteAllText(path, CreatedMsg);
                 }
                 catch (Exception e)
                 {
                     WLMessage = $"Error - {e.Message}";
                     return false;
                 }
-                return true;
             }
             return true;
         }
@@ -240,14 +225,13 @@ namespace TKUtils
                 {
                     string CreatedMsg = string.Format("This log file created by {0}" + Environment.NewLine,
                             GetExeName());
-                    File.WriteAllText(path, CreatedMsg.ToString());
+                    File.WriteAllText(path, CreatedMsg);
                 }
                 catch (Exception e)
                 {
                     WLMessage = $"Error - {e.Message}";
                     return false;
                 }
-                return true;
             }
             return true;
         }
@@ -255,7 +239,7 @@ namespace TKUtils
         // Determine the name of our executable.
         private static string GetExeName()
         {
-            return Path.GetFileName(Assembly.GetEntryAssembly().Location.ToString());
+            return Path.GetFileName(Assembly.GetEntryAssembly().Location);
         }
 
         // Format the timestamp
@@ -268,24 +252,36 @@ namespace TKUtils
 
             switch (ts)
             {
-                case 'U': // US
-                    TimeStamp = Now.ToString("[MM/dd/yyyy HH:mm:ss]  ");
-                    break;
-
-                case 'S': // Short
+                case 'S':
                     TimeStamp = Now.ToString("[MM/dd/yy HH:mm]  ");
                     break;
 
-                case 'L': // Long
-                    TimeStamp = Now.ToString("[MM/dd/yyyy HH:mm:ss.ffff]  ");
+                case 'U':
+                    TimeStamp = Now.ToString("[MM/dd/yyyy HH:mm:ss]  ");
                     break;
 
-                case 'E': // European
+                case 'T':
+                    TimeStamp = Now.ToString("[MM/dd/yyyy HH:mm]  ");
+                    break;
+
+                case 'L':
+                    TimeStamp = Now.ToString("[MM/dd/yyyy HH:mm:ss.ff]  ");
+                    break;
+
+                case 'E':
                     TimeStamp = Now.ToString("[yyyy/MM/dd HH:mm:ss]  ");
                     break;
 
-                case 'M': // Month
+                case 'F':
+                    TimeStamp = Now.ToString("[dd MMM yyyy HH:mm]  ");
+                    break;
+
+                case 'M':
                     TimeStamp = Now.ToString("[dd MMM yyyy HH:mm:ss]  ");
+                    break;
+
+                case 'N':
+                    TimeStamp = Now.ToString("[dd MMM yyyy HH:mm]  ");
                     break;
 
                 default:

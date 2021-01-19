@@ -1,13 +1,15 @@
 ﻿// Copyright(c) Tim Kennedy. All Rights Reserved. Licensed under the MIT License.
 
 #region Using directives
-using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Windows;
+using Microsoft.Win32;
 using TKUtils;
 #endregion Using directives
 
@@ -37,19 +39,36 @@ namespace FreeSpace
         #region Read Settings
         private void ReadSettings()
         {
+            // Handle what didn't get handled
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
+            // Put version in the window title
             Title = AppInfo.AppName + " - " + AppInfo.TitleVersion;
             WriteLog.WriteTempFile($"{AppInfo.AppName} {AppInfo.TitleVersion} is starting up");
 
+            // Window position
             Top = UserSettings.Setting.WindowTop;
             Left = UserSettings.Setting.WindowLeft;
 
+            // Use either GB or GiB for space measurements
+            if (UserSettings.Setting.Use1024)
+            {
+                chkGiB.IsChecked = true;
+            }
+            else
+            {
+                chkGB.IsChecked = true;
+            }
+
+            // Put the log file on the desktop if it isn't specified
             if (string.IsNullOrEmpty(UserSettings.Setting.LogFile))
             {
                 UserSettings.Setting.LogFile = Path.Combine(SpecialFolders.GetDesktopFolder(), "FreeSpace.log");
             }
             WriteLog.WriteTempFile($"Log file is {UserSettings.Setting.LogFile}");
+
+            // Settings change event
+            UserSettings.Setting.PropertyChanged += UserSettingChanged;
         }
         #endregion Read Settings
 
@@ -118,28 +137,34 @@ namespace FreeSpace
             string driveName = drive.Name.TrimEnd('\\');
 
             // Convert to GB
-            double freeSpace = (drive.TotalFreeSpace / Math.Pow(1024, 3));
+            int GBPref = UserSettings.Setting.Use1024 ? 1024 : 1000;
+            double freeSpace = drive.TotalFreeSpace / Math.Pow(GBPref, 3);
 
             switch (UserSettings.Setting.Precision.ToLower())
             {
                 // No decimals, no thousands separator
                 case "n":
-                    strDriveInfo.AppendFormat($"{driveName} {freeSpace,4:###0} GB   ");
+                    _ = strDriveInfo.AppendFormat($"{driveName} {freeSpace,4:###0} GB   ");
                     break;
 
                 // No decimals
                 case "0":
-                    strDriveInfo.AppendFormat($"{driveName} {freeSpace,5:N0} GB   ");
+                    _ = strDriveInfo.AppendFormat($"{driveName} {freeSpace,5:N0} GB   ");
                     break;
 
                 // 1 decimal place
                 case "1":
-                    strDriveInfo.AppendFormat($"{driveName} {freeSpace,7:N1} GB   ");
+                    _ = strDriveInfo.AppendFormat($"{driveName} {freeSpace,7:N1} GB   ");
+                    break;
+
+                // 3 decimal places
+                case "2":
+                    _ = strDriveInfo.AppendFormat($"{driveName} {freeSpace,8:N2} GB   ");
                     break;
 
                 // 2 decimal places
-                case "2":
-                    strDriveInfo.AppendFormat($"{driveName} {freeSpace,8:N2} GB   ");
+                case "3":
+                    _ = strDriveInfo.AppendFormat($"{driveName} {freeSpace,9:N3} GB   ");
                     break;
             }
         }
@@ -258,9 +283,12 @@ namespace FreeSpace
             cbxTimeStamp.ItemsSource = new List<TimeStamp>
             {
                 new TimeStamp { Description = "MM/dd/yy HH:mm", Value = 'S' },
+                new TimeStamp { Description = "MM/dd/yyyy HH:mm", Value = 'T' },
                 new TimeStamp { Description = "MM/dd/yyyy HH:mm:ss", Value = 'U' },
-                new TimeStamp { Description = "MM/dd/yyyy HH:mm:ss.ffff", Value = 'L' },
+                new TimeStamp { Description = "MM/dd/yyyy HH:mm:ss.ff", Value = 'L' },
+                new TimeStamp { Description = "yyyy/MM/dd HH:mm", Value = 'F' },
                 new TimeStamp { Description = "yyyy/MM/dd HH:mm:ss", Value = 'E' },
+                new TimeStamp { Description = "dd MMM yyyy HH:mm", Value = 'N' },
                 new TimeStamp { Description = "dd MMM yyyy HH:mm:ss", Value = 'M' }
             };
             cbxTimeStamp.SelectedValue = UserSettings.Setting.TimeStamp;
@@ -270,9 +298,10 @@ namespace FreeSpace
         {
             cbxPrecision.ItemsSource = new List<PrecisionClass>
             {
-                new PrecisionClass { Description = "0 - 9,999 GB", Value = "0" },
-                new PrecisionClass { Description = "1 - 9,999.9 GB", Value = "1" },
-                new PrecisionClass { Description = "2 - 9,999.99 GB", Value = "2" },
+                new PrecisionClass { Description = "0", Value = "0" },
+                new PrecisionClass { Description = "1", Value = "1" },
+                new PrecisionClass { Description = "2", Value = "2" },
+                new PrecisionClass { Description = "3", Value = "3" },
                 new PrecisionClass { Description = "No Separator", Value = "n" }
             };
             cbxPrecision.SelectedValue = UserSettings.Setting.Precision;
@@ -286,6 +315,25 @@ namespace FreeSpace
             {
                 PrecisionClass x = (PrecisionClass)cbxPrecision.SelectedItem;
                 UserSettings.Setting.Precision = x.Value;
+
+                switch (UserSettings.Setting.Precision)
+                {
+                    case "0":
+                        tbDPlaces.Text = "1,234 GB";
+                        break;
+                    case "1":
+                        tbDPlaces.Text = "1,234.5 GB";
+                        break;
+                    case "2":
+                        tbDPlaces.Text = "1,234.56 GB";
+                        break;
+                    case "3":
+                        tbDPlaces.Text = "1,234.567 GB";
+                        break;
+                    case "n":
+                        tbDPlaces.Text = "1234 GB";
+                        break;
+                }
             }
         }
 
@@ -354,5 +402,15 @@ namespace FreeSpace
             WriteLog.WriteTempFile(e.StackTrace);
         }
         #endregion
+
+        #region Setting Change
+        private void UserSettingChanged(object sender, PropertyChangedEventArgs e)
+        {
+            PropertyInfo prop = sender.GetType().GetProperty(e.PropertyName);
+            var newValue = prop?.GetValue(sender, null);
+
+            Debug.WriteLine($"***Setting change: {e.PropertyName} New Value: {newValue}");
+        }
+        #endregion Setting Change
     }
 }
