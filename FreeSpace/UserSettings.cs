@@ -19,6 +19,7 @@ namespace FreeSpace
             DtRamDisk = false;
             DtRemovable = true;
             DtUnknown = false;
+            GridZoom = 1;
             Precision = "1";
             TimeStamp = 'S';
             Use1024 = true;
@@ -97,6 +98,23 @@ namespace FreeSpace
             }
         }
 
+        public double GridZoom
+        {
+            get
+            {
+                if (gridZoom <= 0)
+                {
+                    gridZoom = 1;
+                }
+                return gridZoom;
+            }
+            set
+            {
+                gridZoom = value;
+                OnPropertyChanged();
+            }
+        }
+
         public string LogFile
         {
             get => logFile;
@@ -171,6 +189,7 @@ namespace FreeSpace
         private bool dtRamDisk;
         private bool dtRemovable;
         private bool dtUnknown;
+        private double gridZoom;
         private string logFile;
         private string precision;
         private char timeStamp;

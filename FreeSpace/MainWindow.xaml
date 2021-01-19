@@ -9,14 +9,15 @@
     Width="600"
     Height="350"
     d:DataContext="{d:DesignInstance Type=local:UserSettings}"
-    Background="GhostWhite"
+    Background="WhiteSmoke"
     Closing="Window_Closing"
     FontSize="15"
+    KeyDown="Window_KeyDown"
+    PreviewMouseWheel="Window_PreviewMouseWheel"
     ResizeMode="CanMinimize"
     SizeToContent="WidthAndHeight"
     mc:Ignorable="d">
-
-    <Grid>
+    <Grid x:Name="grid1">
         <!--#region Row & Column definitions-->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="20" />
@@ -37,7 +38,7 @@
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
-            <RowDefinition Height="20" />
+            <RowDefinition Height="15" />
         </Grid.RowDefinitions>
         <!--#endregion-->
 
@@ -51,8 +52,8 @@
             <Menu
                 Height="24"
                 DockPanel.Dock="Top"
-                FontSize="15">
-                <MenuItem Header="File">
+                FontSize="14">
+                <MenuItem Margin="13,0,0,0" Header="File">
                     <MenuItem
                         Name="mnuTaskSched"
                         Click="MnuTaskSched_Click"

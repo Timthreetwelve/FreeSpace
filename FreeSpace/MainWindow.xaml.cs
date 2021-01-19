@@ -7,8 +7,12 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
+using System.Windows.Input;
+using System.Windows.Interop;
+using System.Windows.Media;
 using Microsoft.Win32;
 using TKUtils;
 #endregion Using directives
@@ -49,6 +53,10 @@ namespace FreeSpace
             // Window position
             Top = UserSettings.Setting.WindowTop;
             Left = UserSettings.Setting.WindowLeft;
+
+            // Set window zoom level
+            double curZoom = UserSettings.Setting.GridZoom;
+            grid1.LayoutTransform = new ScaleTransform(curZoom, curZoom);
 
             // Use either GB or GiB for space measurements
             if (UserSettings.Setting.Use1024)
@@ -270,6 +278,52 @@ namespace FreeSpace
         }
         #endregion Window events
 
+        #region Mouse Events
+        private void Window_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (Keyboard.Modifiers != ModifierKeys.Control)
+                return;
+
+            if (e.Delta > 0)
+            {
+                GridLarger();
+            }
+            else if (e.Delta < 0)
+            {
+                GridSmaller();
+            }
+        }
+        #endregion Mouse Events
+
+        #region Keyboard Events
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.NumPad0 && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
+            {
+                GridSizeReset();
+            }
+
+            if (e.Key == Key.Add && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
+            {
+                GridLarger();
+            }
+
+            if (e.Key == Key.Subtract && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
+            {
+                GridSmaller();
+            }
+            if (e.Key == Key.F1)
+            {
+                About about = new About
+                {
+                    Owner = Application.Current.MainWindow,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner
+                };
+                _ = about.ShowDialog();
+            }
+        }
+        #endregion Keyboard Events
+
         #region Initialize combo boxes
         private void InitializeComboboxes()
         {
@@ -285,7 +339,6 @@ namespace FreeSpace
                 new TimeStamp { Description = "MM/dd/yy HH:mm", Value = 'S' },
                 new TimeStamp { Description = "MM/dd/yyyy HH:mm", Value = 'T' },
                 new TimeStamp { Description = "MM/dd/yyyy HH:mm:ss", Value = 'U' },
-                new TimeStamp { Description = "MM/dd/yyyy HH:mm:ss.ff", Value = 'L' },
                 new TimeStamp { Description = "yyyy/MM/dd HH:mm", Value = 'F' },
                 new TimeStamp { Description = "yyyy/MM/dd HH:mm:ss", Value = 'E' },
                 new TimeStamp { Description = "dd MMM yyyy HH:mm", Value = 'N' },
@@ -412,5 +465,33 @@ namespace FreeSpace
             Debug.WriteLine($"***Setting change: {e.PropertyName} New Value: {newValue}");
         }
         #endregion Setting Change
+
+        #region Grid Size
+        private void GridSmaller()
+        {
+            double curZoom = UserSettings.Setting.GridZoom;
+            if (curZoom > 0.9)
+            {
+                curZoom -= .05;
+                UserSettings.Setting.GridZoom = Math.Round(curZoom, 2);
+            }
+            grid1.LayoutTransform = new ScaleTransform(curZoom, curZoom);
+        }
+        private void GridLarger()
+        {
+            double curZoom = UserSettings.Setting.GridZoom;
+            if (curZoom < 1.3)
+            {
+                curZoom += .05;
+                UserSettings.Setting.GridZoom = Math.Round(curZoom, 2);
+            }
+            grid1.LayoutTransform = new ScaleTransform(curZoom, curZoom);
+        }
+        private void GridSizeReset()
+        {
+            UserSettings.Setting.GridZoom = 1.0;
+            grid1.LayoutTransform = new ScaleTransform(1, 1);
+        }
+        #endregion Grid Size
     }
 }
