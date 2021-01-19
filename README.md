@@ -1,5 +1,7 @@
 ## FreeSpace
-FreeSpace is a program that will list the amount of free space available on your disk drives that are in Ready status and match the drive types specified.  The amount of free space will be written to a log file that you specify.
+FreeSpace is an application that will list the amount of free space available on your disk drives that are in Ready status and match the drive types specified.  The amount of free space will be written to a log file that you specify.
+
+ If you just want to see the available space and not necessarily log it, try my DriveInfo app.
 
 #### Features
 
@@ -21,8 +23,8 @@ FreeSpace is a program that will list the amount of free space available on your
 
 #### Main Window
 
-![GetMyIP screenshot](https://github.com/Timthreetwelve/GetMyIP/blob/main/Images/FreeSpace.png?raw=true)
+![FreeSpace screenshot](https://github.com/Timthreetwelve/FreeSpace/blob/main/Images/FreeSpace.png?raw=true)
 
 #### Log File
 
-![GetMyIP screenshot](https://github.com/Timthreetwelve/GetMyIP/blob/main/Images/FreeSpace_log.png?raw=true)
+![FreeSpace log screenshot](https://github.com/Timthreetwelve/FreeSpace/blob/main/Images/FreeSpace_log.png?raw=true)
