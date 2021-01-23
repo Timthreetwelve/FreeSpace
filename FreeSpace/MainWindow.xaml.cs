@@ -390,7 +390,8 @@ namespace FreeSpace
                 new TimeStamp { Description = "yyyy/MM/dd HH:mm", Value = "Y1" },
                 new TimeStamp { Description = "yyyy/MM/dd HH:mm:ss", Value = "Y2" },
                 new TimeStamp { Description = "dd MMM yyyy HH:mm", Value = "D1" },
-                new TimeStamp { Description = "dd MMM yyyy HH:mm:ss", Value = "D2" }
+                new TimeStamp { Description = "dd MMM yyyy HH:mm:ss", Value = "D2" },
+                new TimeStamp { Description = "None", Value = "" }
             };
             cbxTimeStamp.SelectedValue = UserSettings.Setting.TimeStamp;
         }
