@@ -36,6 +36,8 @@ FreeSpace uses the following icons & packages:
 
 Json.net v12.0.3 from Newtonsoft https://www.newtonsoft.com/json
 
+NLog v4.7.7 https://nlog-project.org/
+
 
 MIT License
 Copyright (c) 2021 Tim Kennedy

@@ -81,6 +81,10 @@ namespace TKUtils
             }
             else
             {
+                _ = TKMessageBox.Show($"Unable to open\n{txtfile}\nFile not found.",
+                      "Error",
+                      MessageBoxButton.OK,
+                      MessageBoxImage.Error);
                 logTemp.Error($"File not found: {txtfile}");
             }
         }
