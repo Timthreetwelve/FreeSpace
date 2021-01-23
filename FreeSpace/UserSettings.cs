@@ -21,7 +21,7 @@ namespace FreeSpace
             DtUnknown = false;
             GridZoom = 1;
             Precision = "1";
-            TimeStamp = 'S';
+            TimeStamp = "M1";
             Use1024 = true;
             WindowLeft = 100;
             WindowTop = 100;
@@ -135,7 +135,7 @@ namespace FreeSpace
             }
         }
 
-        public char TimeStamp
+        public string TimeStamp
         {
             get => timeStamp; set
             {
@@ -192,7 +192,7 @@ namespace FreeSpace
         private double gridZoom;
         private string logFile;
         private string precision;
-        private char timeStamp;
+        private string timeStamp;
         private bool use1024;
         private double windowTop;
         private double windowLeft;

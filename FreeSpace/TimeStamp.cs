@@ -6,6 +6,6 @@ namespace FreeSpace
     {
         public string Description { get; set; }
 
-        public char Value { get; set; }
+        public string Value { get; set; }
     }
 }

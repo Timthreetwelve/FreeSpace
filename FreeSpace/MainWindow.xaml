@@ -104,7 +104,7 @@
             Padding="3,1"
             VerticalContentAlignment="Center"
             MaxLength="260"
-            Text="{Binding LogFile, Source={x:Static local:UserSettings.Setting}}" />
+            Text="{Binding LogFile, Source={x:Static local:UserSettings.Setting}, UpdateSourceTrigger=PropertyChanged}" />
         <Button
             x:Name="btnOpenDlg"
             Grid.Row="2"

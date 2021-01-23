@@ -114,7 +114,7 @@ namespace TKUtils
                 }
                 catch (Exception ex)
                 {
-                    _ = MessageBox.Show($"Error reading settings file.\n{ex}",
+                    _ = TKMessageBox.Show($"Error reading settings file.\n{ex}",
                                         "Error",
                                         MessageBoxButton.OK,
                                         MessageBoxImage.Error);
@@ -140,7 +140,7 @@ namespace TKUtils
             }
             catch (Exception ex)
             {
-                _ = MessageBox.Show($"Error saving settings file.\n{ex}",
+                _ = TKMessageBox.Show($"Error saving settings file.\n{ex}",
                                      "Error",
                                      MessageBoxButton.OK,
                                      MessageBoxImage.Error);
@@ -167,7 +167,7 @@ namespace TKUtils
             }
             catch (Exception ex)
             {
-                _ = MessageBox.Show($"Error creating settings file.\n{ex}",
+                _ = TKMessageBox.Show($"Error creating settings file.\n{ex}",
                                      "Error",
                                      MessageBoxButton.OK,
                                      MessageBoxImage.Error);

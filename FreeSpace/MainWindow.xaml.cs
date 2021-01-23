@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Win32;
+using NLog;
 using TKUtils;
 #endregion Using directives
 
@@ -25,6 +26,11 @@ namespace FreeSpace
         #region private variables
         private static readonly StringBuilder strDriveInfo = new StringBuilder();
         #endregion private variables
+
+        #region NLog Instance
+        private static readonly Logger logTemp = LogManager.GetLogger("logTemp");
+        private static readonly Logger logPerm = LogManager.GetLogger("logPerm");
+        #endregion NLog Instance
 
         public MainWindow()
         {
@@ -45,9 +51,13 @@ namespace FreeSpace
             // Handle what didn't get handled
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
+            // Change the log file filename when debugging
+            string env = Debugger.IsAttached ? "debug" : "temp";
+            GlobalDiagnosticsContext.Set("TempOrDebug", env);
+
             // Put version in the window title
             Title = AppInfo.AppName + " - " + AppInfo.TitleVersion;
-            WriteLog.WriteTempFile($"{AppInfo.AppName} {AppInfo.TitleVersion} is starting up");
+            logTemp.Info($"{AppInfo.AppName} {AppInfo.TitleVersion} is starting up");
 
             // Window position
             Top = UserSettings.Setting.WindowTop;
@@ -72,7 +82,6 @@ namespace FreeSpace
             {
                 UserSettings.Setting.LogFile = Path.Combine(SpecialFolders.GetDesktopFolder(), "FreeSpace.log");
             }
-            WriteLog.WriteTempFile($"Log file is {UserSettings.Setting.LogFile}");
 
             // Settings change event
             UserSettings.Setting.PropertyChanged += UserSettingChanged;
@@ -130,7 +139,7 @@ namespace FreeSpace
                         }
                         break;
                     default:
-                        Debug.WriteLine("Switch statement fell through to default");
+                        logTemp.Debug("Switch statement fell through to default");
                         break;
                 }
             }
@@ -183,33 +192,67 @@ namespace FreeSpace
         }
         #endregion Format the free space amount
 
+        #region Format Timestamp
+        private static string FormatTimeStamp()
+        {
+            DateTime Now = DateTime.Now;
+            string TimeStamp;
+
+            switch (UserSettings.Setting.TimeStamp)
+            {
+                case "M1":
+                    TimeStamp = Now.ToString("[MM/dd/yy HH:mm]  ");
+                    break;
+
+                case "M2":
+                    TimeStamp = Now.ToString("[MM/dd/yyyy HH:mm]  ");
+                    break;
+
+                case "M3":
+                    TimeStamp = Now.ToString("[MM/dd/yyyy HH:mm:ss]  ");
+                    break;
+
+                case "M4":
+                    TimeStamp = Now.ToString("[MM/dd/yyyy HH:mm:ss.ff]  ");
+                    break;
+
+                case "Y1":
+                    TimeStamp = Now.ToString("[yyyy/MM/dd HH:mm]  ");
+                    break;
+
+                case "Y2":
+                    TimeStamp = Now.ToString("[yyyy/MM/dd HH:mm:ss]  ");
+                    break;
+
+                case "D1":
+                    TimeStamp = Now.ToString("[dd MMM yyyy HH:mm]  ");
+                    break;
+
+                case "D2":
+                    TimeStamp = Now.ToString("[dd MMM yyyy HH:mm:ss]  ");
+                    break;
+
+                default:
+                    TimeStamp = "";
+                    break;
+            }
+            if (!UserSettings.Setting.Brackets)
+            {
+                TimeStamp = TimeStamp.Replace("[", "").Replace("]", "");
+            }
+            return TimeStamp;
+        }
+        #endregion Format Timestamp
+
         #region Write to log file
         private void WriteToLog()
         {
-            bool result;
-
-            if (UserSettings.Setting.Brackets)
-            {
-                result = WriteLog.WriteLogFile(UserSettings.Setting.LogFile, strDriveInfo.ToString(),
-                                               UserSettings.Setting.TimeStamp, 'Y');
-            }
-            else
-            {
-                result = WriteLog.WriteLogFile(UserSettings.Setting.LogFile, strDriveInfo.ToString(),
-                                               UserSettings.Setting.TimeStamp, 'N');
-            }
-
-            WriteLog.WriteTempFile(strDriveInfo.ToString());
-
-            strDriveInfo.Clear();
-
-            if (!result)
-            {
-                _ = MessageBox.Show($"Error writing to log file\n{WriteLog.WLMessage}",
-                                    "Error",
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Error);
-            }
+            logTemp.Info($"Log file is {UserSettings.Setting.LogFile}");
+            GlobalDiagnosticsContext.Set("LogPerm", UserSettings.Setting.LogFile);
+            _ = strDriveInfo.Insert(0, FormatTimeStamp());
+            logTemp.Info(strDriveInfo.ToString());
+            logPerm.Info(strDriveInfo.ToString());
+            _ = strDriveInfo.Clear();
         }
         #endregion Write to log file
 
@@ -230,7 +273,7 @@ namespace FreeSpace
 
                 if (arg == "write" || arg == "hide")
                 {
-                    WriteLog.WriteTempFile($"Command line argument \"{item}\" found.");
+                    logTemp.Info($"Command line argument \"{item}\" found.");
 
                     // hide the window
                     Visibility = Visibility.Hidden;
@@ -244,20 +287,20 @@ namespace FreeSpace
                 }
                 else if (item != args[0])
                 {
-                    WriteLog.WriteTempFile($"Unknown command line argument  \"{item}\" found.");
+                    logTemp.Info($"Unknown command line argument  \"{item}\" found.");
                 }
             }
         }
         #endregion Command line arguments
 
         #region Window events
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void Window_Closing(object sender, CancelEventArgs e)
         {
             UserSettings.Setting.WindowLeft = Left;
             UserSettings.Setting.WindowTop = Top;
             UserSettings.SaveSettings();
 
-            WriteLog.WriteTempFile($"{AppInfo.AppName} is shutting down");
+            logTemp.Info($"{AppInfo.AppName} is shutting down");
         }
 
         // File picker
@@ -341,13 +384,13 @@ namespace FreeSpace
         {
             cbxTimeStamp.ItemsSource = new List<TimeStamp>
             {
-                new TimeStamp { Description = "MM/dd/yy HH:mm", Value = 'S' },
-                new TimeStamp { Description = "MM/dd/yyyy HH:mm", Value = 'T' },
-                new TimeStamp { Description = "MM/dd/yyyy HH:mm:ss", Value = 'U' },
-                new TimeStamp { Description = "yyyy/MM/dd HH:mm", Value = 'F' },
-                new TimeStamp { Description = "yyyy/MM/dd HH:mm:ss", Value = 'E' },
-                new TimeStamp { Description = "dd MMM yyyy HH:mm", Value = 'N' },
-                new TimeStamp { Description = "dd MMM yyyy HH:mm:ss", Value = 'M' }
+                new TimeStamp { Description = "MM/dd/yy HH:mm", Value = "M1" },
+                new TimeStamp { Description = "MM/dd/yyyy HH:mm", Value = "M2" },
+                new TimeStamp { Description = "MM/dd/yyyy HH:mm:ss", Value = "M3" },
+                new TimeStamp { Description = "yyyy/MM/dd HH:mm", Value = "Y1" },
+                new TimeStamp { Description = "yyyy/MM/dd HH:mm:ss", Value = "Y2" },
+                new TimeStamp { Description = "dd MMM yyyy HH:mm", Value = "D1" },
+                new TimeStamp { Description = "dd MMM yyyy HH:mm:ss", Value = "D2" }
             };
             cbxTimeStamp.SelectedValue = UserSettings.Setting.TimeStamp;
         }
@@ -456,11 +499,8 @@ namespace FreeSpace
         #region Unhandled Exception Handler
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs args)
         {
-            WriteLog.WriteTempFile("Unhandled Exception");
             Exception e = (Exception)args.ExceptionObject;
-            WriteLog.WriteTempFile(e.Message);
-            WriteLog.WriteTempFile(e.InnerException.ToString());
-            WriteLog.WriteTempFile(e.StackTrace);
+            logTemp.Info(e, "Unhandled Exception");
         }
         #endregion
 
@@ -470,7 +510,7 @@ namespace FreeSpace
             PropertyInfo prop = sender.GetType().GetProperty(e.PropertyName);
             var newValue = prop?.GetValue(sender, null);
 
-            Debug.WriteLine($"***Setting change: {e.PropertyName} New Value: {newValue}");
+            logTemp.Debug($"***Setting change: {e.PropertyName} New Value: {newValue}");
         }
         #endregion Setting Change
 

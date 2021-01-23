@@ -83,8 +83,10 @@
     <Compile Include="SpecialFolders.cs" />
     <Compile Include="TextFileViewer.cs" />
     <Compile Include="TimeStamp.cs" />
+    <Compile Include="TKMessageBox.xaml.cs">
+      <DependentUpon>TKMessageBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserSettings.cs" />
-    <Compile Include="WriteLog.cs" />
     <Page Include="About.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -101,6 +103,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="TKMessageBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -117,6 +123,19 @@
     </EmbeddedResource>
     <None Include="..\.editorconfig">
       <Link>.editorconfig</Link>
+    </None>
+    <Resource Include="Images\ArrowCircle.png" />
+    <Resource Include="Images\Check.png" />
+    <Resource Include="Images\Error.png" />
+    <Resource Include="Images\information.png" />
+    <Resource Include="Images\Question.png" />
+    <Resource Include="Images\RedX.png" />
+    <Resource Include="Images\Warning.png" />
+    <Content Include="NLog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="NLog.xsd">
+      <SubType>Designer</SubType>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -140,6 +159,12 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json">
       <Version>12.0.3</Version>
+    </PackageReference>
+    <PackageReference Include="NLog">
+      <Version>4.7.7</Version>
+    </PackageReference>
+    <PackageReference Include="NLog.Schema">
+      <Version>4.7.7</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
